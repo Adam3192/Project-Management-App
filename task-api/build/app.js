@@ -11,6 +11,8 @@ const connectionString = 'mongodb://localhost:27017/taskMgmtApp';
 mongoose_1.default.connect(connectionString).then(() => console.log('database connection successful!'), err => console.log('Error connecting to the database', err));
 const app = (0, express_1.default)();
 app.use((0, morgan_1.default)('dev'));
+const cors = require('cors');
+app.use(cors());
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
 // routes

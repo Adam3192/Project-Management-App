@@ -27,7 +27,6 @@ setupIonicReact()
 
 const App = () => (
   <IonApp>
-    <TaskProvider>
       <IonReactRouter>
         <IonRouterOutlet>
           <Route exact path="/home">
@@ -38,7 +37,6 @@ const App = () => (
           </Route>
         </IonRouterOutlet>
       </IonReactRouter>
-    </TaskProvider>
   </IonApp>
 )
 
