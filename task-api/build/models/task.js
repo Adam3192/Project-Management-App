@@ -8,7 +8,8 @@ const taskSchema = new mongoose_1.Schema({
         required: true,
     },
     completed: {
-        type: Boolean
+        type: Boolean,
+        default: false
     },
 });
 const Task = (0, mongoose_1.model)('Task', taskSchema);

@@ -6,6 +6,9 @@ import {
   IonHeader,
   IonIcon,
   IonItem,
+  IonItemOption,
+  IonItemOptions,
+  IonItemSliding,
   IonLabel,
   IonList,
   IonListHeader,
@@ -19,9 +22,9 @@ import TaskContext from '../contexts/TaskContext'
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 import React from 'react'
-import { add } from 'ionicons/icons'
+import { add, archive, heart, trash } from 'ionicons/icons'
 import { Link } from 'react-router-dom'
-import { Dialog } from '@capacitor/dialog';
+import { Dialog } from '@capacitor/dialog'
 
 const Home: React.FC = () => {
   useEffect(() => {
@@ -33,7 +36,8 @@ const Home: React.FC = () => {
   }, [])
 
   const [allTasks, setAllTasks] = React.useState([])
-  const baseUrl = 'http://localhost:3000/tasks'
+  const [checked, setChecked] = React.useState(false)
+  const baseUrl = 'http://localhost:3000/tasks/'
 
   async function getAllTasks() {
     return axios.get(baseUrl).then((response: any) => {
@@ -41,64 +45,169 @@ const Home: React.FC = () => {
     })
   }
 
-  async function addTask(title:string) {
-
+  async function addTask(title: string) {
     let task = { title }
-    return axios
-      .post(baseUrl, task)
-      .then((response) => {
+    return axios.post(baseUrl, task).then((response) => {
+      getAllTasks()
+      return new Promise((resolve) => resolve(response.data))
+    })
+  }
+
+  function deleteTask(id:string) {
+    axios
+      .delete(baseUrl + id)
+      .then(() => {
         getAllTasks()
-        return new Promise((resolve) => resolve(response.data))
+      })
+      .catch((error) => {
+        console.log(error)
       })
   }
 
-  const showPrompt = async (title: string, message: string, inputText: string) => {
+  async function editTask(completed: boolean, id: string) {
+    let updatedTask = { completed }
+
+    return axios.put(baseUrl + id, updatedTask).then((response) => {
+      getAllTasks()
+      return new Promise((resolve) => resolve(response.data))
+    })
+  }
+
+  const showPrompt = async (
+    title: string,
+    message: string,
+    inputText: string
+  ) => {
     const { value } = await Dialog.prompt({
-        title,
-        message,
-        inputText
-    });
+      title,
+      message,
+      inputText,
+    })
 
-    return value;
-};
+    return value
+  }
 
-const prompt = async () => {
-  showPrompt('Task Title', 'Task Title', 'Enter Task').then(title => {
-      addTask(title);
-      console.log(title);
-  });
-}
+  const prompt = async () => {
+    showPrompt('Task Title', 'Task Title', 'Enter Task').then((title) => {
+      addTask(title)
+      console.log(title)
+    })
+  }
 
-  const displayTasks = () => {
+  const notUsed = () => {
     return allTasks.map((task: any) => {
       return (
-        <IonItem key={task._id}>
+        <IonItem
+          onClick={
+            task.completed
+              ? () => editTask(false, task._id)
+              : () => editTask(true, task._id)
+          }
+          key={task._id}
+        >
           <IonLabel>{task.title}</IonLabel>
-          <IonCheckbox></IonCheckbox>
+          <IonCheckbox
+            onIonChange={(e) => setChecked(e.detail.checked)}
+            checked={task.completed}
+          />
         </IonItem>
       )
     })
   }
 
+  function completedTasks() {
+    return allTasks
+      .filter((task: any) => {
+        if (task.completed) {
+          return task
+        }
+      })
+      .map((task: any) => {
+        return (
+          <IonItemSliding>
+            <IonItem
+              onClick={
+                task.completed
+                  ? () => editTask(false, task._id)
+                  : () => editTask(true, task._id)
+              }
+              key={task._id}
+            >
+              <IonLabel>{task.title}</IonLabel>
+              <IonCheckbox
+                onIonChange={(e) => setChecked(e.detail.checked)}
+                checked={task.completed}
+              />
+            </IonItem>
+            <IonItemOptions side="end">
+              <IonItemOption onClick={() => deleteTask(task._id)} color="danger">
+                <IonIcon slot="icon-only" icon={trash}></IonIcon>
+              </IonItemOption>
+            </IonItemOptions>
+          </IonItemSliding>
+        )
+      })
+  }
+
+  function incompleteTasks() {
+    return allTasks
+      .filter((task: any) => {
+        if (!task.completed) {
+          return task
+        }
+      })
+      .map((task: any) => {
+        return (
+          <IonItemSliding>
+            <IonItem
+              onClick={
+                task.completed
+                  ? () => editTask(false, task._id)
+                  : () => editTask(true, task._id)
+              }
+              key={task._id}
+            >
+              <IonLabel>{task.title}</IonLabel>
+              <IonCheckbox
+                onIonChange={(e) => setChecked(e.detail.checked)}
+                checked={task.completed}
+              />
+            </IonItem>
+            <IonItemOptions side="end">
+              <IonItemOption onClick={() => deleteTask(task._id)} color="danger">
+                <IonIcon slot="icon-only" icon={trash}></IonIcon>
+              </IonItemOption>
+            </IonItemOptions>
+          </IonItemSliding>
+        )
+      })
+  }
+
   return (
     <IonPage>
       <IonHeader>
-        <IonToolbar>
+        <IonToolbar color="tertiary">
           <IonTitle>Task List</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent fullscreen>
         <IonList>
-          <IonListHeader>
-            <IonLabel>Tasks</IonLabel>
+          <IonListHeader color="secondary">
+            <IonLabel>Incomplete</IonLabel>
           </IonListHeader>
-          {displayTasks()}
+          {incompleteTasks()}
+        </IonList>
+        <IonList>
+          <IonListHeader color="secondary">
+            <IonLabel>Complete</IonLabel>
+          </IonListHeader>
+          {completedTasks()}
         </IonList>
       </IonContent>
-      <IonFooter className='ion-padding'>
-          <IonButton onClick={prompt} className='ion-float-right'>
-            <IonIcon slot="icon-only" icon={add}></IonIcon>
-          </IonButton>
+      <IonFooter className="ion-padding">
+        <IonButton onClick={prompt} className="ion-float-right">
+          <IonIcon slot="icon-only" icon={add}></IonIcon>
+        </IonButton>
       </IonFooter>
     </IonPage>
   )
