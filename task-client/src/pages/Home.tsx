@@ -16,13 +16,12 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/react'
-import ExploreContainer from '../components/ExploreContainer'
 import './Home.css'
 import TaskContext from '../contexts/TaskContext'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import axios from 'axios'
 import React from 'react'
-import { add, archive, heart, trash } from 'ionicons/icons'
+import { add, trash } from 'ionicons/icons'
 import { Link } from 'react-router-dom'
 import { Dialog } from '@capacitor/dialog'
 
@@ -36,7 +35,6 @@ const Home: React.FC = () => {
   }, [])
 
   const [allTasks, setAllTasks] = React.useState([])
-  const [checked, setChecked] = React.useState(false)
   const baseUrl = 'http://localhost:3000/tasks/'
 
   async function getAllTasks() {
@@ -53,7 +51,7 @@ const Home: React.FC = () => {
     })
   }
 
-  function deleteTask(id:string) {
+  function deleteTask(id: string) {
     axios
       .delete(baseUrl + id)
       .then(() => {
@@ -72,6 +70,12 @@ const Home: React.FC = () => {
       return new Promise((resolve) => resolve(response.data))
     })
   }
+
+  const ref = useCallback((swipe:any) => {
+    if (swipe) {
+      swipe.closeOpened()
+    }
+  }, [])
 
   const showPrompt = async (
     title: string,
@@ -94,27 +98,6 @@ const Home: React.FC = () => {
     })
   }
 
-  const notUsed = () => {
-    return allTasks.map((task: any) => {
-      return (
-        <IonItem
-          onClick={
-            task.completed
-              ? () => editTask(false, task._id)
-              : () => editTask(true, task._id)
-          }
-          key={task._id}
-        >
-          <IonLabel>{task.title}</IonLabel>
-          <IonCheckbox
-            onIonChange={(e) => setChecked(e.detail.checked)}
-            checked={task.completed}
-          />
-        </IonItem>
-      )
-    })
-  }
-
   function completedTasks() {
     return allTasks
       .filter((task: any) => {
@@ -124,27 +107,28 @@ const Home: React.FC = () => {
       })
       .map((task: any) => {
         return (
-          <IonItemSliding>
-            <IonItem
-              onClick={
-                task.completed
-                  ? () => editTask(false, task._id)
-                  : () => editTask(true, task._id)
-              }
-              key={task._id}
-            >
-              <IonLabel>{task.title}</IonLabel>
-              <IonCheckbox
-                onIonChange={(e) => setChecked(e.detail.checked)}
-                checked={task.completed}
-              />
-            </IonItem>
-            <IonItemOptions side="end">
-              <IonItemOption onClick={() => deleteTask(task._id)} color="danger">
-                <IonIcon slot="icon-only" icon={trash}></IonIcon>
-              </IonItemOption>
-            </IonItemOptions>
-          </IonItemSliding>
+            <IonItemSliding ref={ref}>
+              <IonItem
+                onClick={
+                  task.completed
+                    ? () => editTask(false, task._id)
+                    : () => editTask(true, task._id)
+                }
+                key={task._id}
+              >
+                <IonLabel>{task.title}</IonLabel>
+                <IonCheckbox checked={task.completed} />
+              </IonItem>
+              <IonItemOptions side="end">
+                <IonItemOption color="danger">
+                  <IonIcon
+                    onClick={() => deleteTask(task._id)}
+                    slot="icon-only"
+                    icon={trash}
+                  ></IonIcon>
+                </IonItemOption>
+              </IonItemOptions>
+            </IonItemSliding>
         )
       })
   }
@@ -158,7 +142,7 @@ const Home: React.FC = () => {
       })
       .map((task: any) => {
         return (
-          <IonItemSliding>
+          <IonItemSliding ref={ref}>
             <IonItem
               onClick={
                 task.completed
@@ -168,13 +152,13 @@ const Home: React.FC = () => {
               key={task._id}
             >
               <IonLabel>{task.title}</IonLabel>
-              <IonCheckbox
-                onIonChange={(e) => setChecked(e.detail.checked)}
-                checked={task.completed}
-              />
+              <IonCheckbox checked={task.completed} />
             </IonItem>
             <IonItemOptions side="end">
-              <IonItemOption onClick={() => deleteTask(task._id)} color="danger">
+              <IonItemOption
+                onClick={() => deleteTask(task._id)}
+                color="danger"
+              >
                 <IonIcon slot="icon-only" icon={trash}></IonIcon>
               </IonItemOption>
             </IonItemOptions>
