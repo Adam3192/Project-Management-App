@@ -1,4 +1,5 @@
 import {
+  IonAvatar,
   IonButton,
   IonCheckbox,
   IonContent,
@@ -71,7 +72,7 @@ const Home: React.FC = () => {
     })
   }
 
-  const ref = useCallback((swipe:any) => {
+  const ref = useCallback((swipe: any) => {
     if (swipe) {
       swipe.closeOpened()
     }
@@ -107,28 +108,28 @@ const Home: React.FC = () => {
       })
       .map((task: any) => {
         return (
-            <IonItemSliding ref={ref}>
-              <IonItem
-                onClick={
-                  task.completed
-                    ? () => editTask(false, task._id)
-                    : () => editTask(true, task._id)
-                }
-                key={task._id}
-              >
-                <IonLabel>{task.title}</IonLabel>
-                <IonCheckbox checked={task.completed} />
-              </IonItem>
-              <IonItemOptions side="end">
-                <IonItemOption color="danger">
-                  <IonIcon
-                    onClick={() => deleteTask(task._id)}
-                    slot="icon-only"
-                    icon={trash}
-                  ></IonIcon>
-                </IonItemOption>
-              </IonItemOptions>
-            </IonItemSliding>
+          <IonItemSliding ref={ref}>
+            <IonItem
+              onClick={
+                task.completed
+                  ? () => editTask(false, task._id)
+                  : () => editTask(true, task._id)
+              }
+              key={task._id}
+            >
+              <IonLabel>{task.title}</IonLabel>
+              <IonCheckbox checked={task.completed} />
+            </IonItem>
+            <IonItemOptions side="end">
+              <IonItemOption color="danger">
+                <IonIcon
+                  onClick={() => deleteTask(task._id)}
+                  slot="icon-only"
+                  icon={trash}
+                ></IonIcon>
+              </IonItemOption>
+            </IonItemOptions>
+          </IonItemSliding>
         )
       })
   }
@@ -181,7 +182,7 @@ const Home: React.FC = () => {
           </IonListHeader>
           {incompleteTasks()}
         </IonList>
-        <IonList>
+        <IonList className="ion-padding-top">
           <IonListHeader color="secondary">
             <IonLabel>Complete</IonLabel>
           </IonListHeader>
@@ -189,9 +190,9 @@ const Home: React.FC = () => {
         </IonList>
       </IonContent>
       <IonFooter className="ion-padding">
-        <IonButton onClick={prompt} className="ion-float-right">
-          <IonIcon slot="icon-only" icon={add}></IonIcon>
-        </IonButton>
+          <IonButton onClick={prompt} className="ion-float-right">
+            <IonIcon slot="icon-only" icon={add}></IonIcon>
+          </IonButton>
       </IonFooter>
     </IonPage>
   )
