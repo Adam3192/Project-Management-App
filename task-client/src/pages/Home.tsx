@@ -1,5 +1,4 @@
 import {
-  IonAvatar,
   IonButton,
   IonCheckbox,
   IonContent,
@@ -18,15 +17,21 @@ import {
   IonToolbar,
 } from '@ionic/react'
 import './Home.css'
-import TaskContext from '../contexts/TaskContext'
 import { useCallback, useEffect, useState } from 'react'
-import axios from 'axios'
 import React from 'react'
 import { add, trash } from 'ionicons/icons'
-import { Link } from 'react-router-dom'
 import { Dialog } from '@capacitor/dialog'
+import { useAxios } from '../hooks/useAxios'
 
 const Home: React.FC = () => {
+  const { taskList, createTask, destroyTask, updateTask } = useAxios()
+  
+  const ref = useCallback((swipe: any) => {
+    if (swipe) {
+      swipe.closeOpened()
+    }
+  }, [])
+
   useEffect(() => {
     async function getTasks() {
       await getAllTasks()
@@ -36,47 +41,24 @@ const Home: React.FC = () => {
   }, [])
 
   const [allTasks, setAllTasks] = React.useState([])
-  const baseUrl = 'http://localhost:3000/tasks/'
 
   async function getAllTasks() {
-    return axios.get(baseUrl).then((response: any) => {
+    return taskList().then((response: any) => {
       setAllTasks(response.data)
     })
   }
 
   async function addTask(title: string) {
-    let task = { title }
-    return axios.post(baseUrl, task).then((response) => {
-      getAllTasks()
-      return new Promise((resolve) => resolve(response.data))
-    })
+    return createTask(title).then(getAllTasks);
   }
 
-  function deleteTask(id: string) {
-    axios
-      .delete(baseUrl + id)
-      .then(() => {
-        getAllTasks()
-      })
-      .catch((error) => {
-        console.log(error)
-      })
+  async function deleteTask(id: string) {
+    return destroyTask(id).then(getAllTasks);
   }
 
   async function editTask(completed: boolean, id: string) {
-    let updatedTask = { completed }
-
-    return axios.put(baseUrl + id, updatedTask).then((response) => {
-      getAllTasks()
-      return new Promise((resolve) => resolve(response.data))
-    })
+    return updateTask(completed, id).then(getAllTasks);
   }
-
-  const ref = useCallback((swipe: any) => {
-    if (swipe) {
-      swipe.closeOpened()
-    }
-  }, [])
 
   const showPrompt = async (
     title: string,
