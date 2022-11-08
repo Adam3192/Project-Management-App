@@ -171,10 +171,12 @@ const Home: React.FC = () => {
           {completedTasks()}
         </IonList>
       </IonContent>
-      <IonFooter className="ion-padding">
-          <IonButton onClick={prompt} className="ion-float-right">
+      <IonFooter translucent={true} className="ion-no-border">
+        <IonToolbar>
+          <IonButton onClick={prompt} className=" ion-margin ion-float-right">
             <IonIcon slot="icon-only" icon={add}></IonIcon>
           </IonButton>
+        </IonToolbar>
       </IonFooter>
     </IonPage>
   )
